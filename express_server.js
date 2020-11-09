@@ -20,3 +20,10 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+// when we do :
+//curl -i http://localhost:8080/hello we will see :
+// We see the entire HTTP response string:
+
+// the response headers (one on each line), followed by
+// the HTML content that the /hello path responds with: <html><body>Hello <b>World</b></body></html>
