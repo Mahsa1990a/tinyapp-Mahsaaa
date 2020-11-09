@@ -24,6 +24,11 @@ app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase }; //When sending variables to an EJS template, we need to send them inside an object //// key : urls
   res.render("urls_index", templateVars); //in view we have urls_index.js
 });
+//Add a GET Route to Show the Form and should be before app.get("/urls/:id", ...)
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
 //Adding a Second Route and Template
 app.get("/urls/:shortURL", (req, res) => { // : in front of id indicates that id is a route parameter, so :  the value in this part of the url will be available in the req.params object.
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]}; //object
