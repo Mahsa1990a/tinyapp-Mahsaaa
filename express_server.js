@@ -9,6 +9,9 @@ const urlDatabase = { //it's an object
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+//Getting Ready for POST Requests(we need another piece of middleware: body-parser)
+const bodyParser = require("body-parser"); //we installed bodyparser///// it is a library
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.get("/", (req, res) => {
   res.send("Hello!");                     // I can hear you
