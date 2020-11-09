@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Mahsa1990a/tinyapp-Mahsaaa/issues"
   },
-  "homepage": "https://github.com/Mahsa1990a/tinyapp-Mahsaaa#readme"
+  "homepage": "https://github.com/Mahsa1990a/tinyapp-Mahsaaa#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
