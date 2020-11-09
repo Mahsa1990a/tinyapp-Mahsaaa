@@ -5,7 +5,7 @@ const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs") //This tells the Express app to use EJS as its templating engine
 
-const urlDatabase = {
+const urlDatabase = { //it's an object
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -19,7 +19,16 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
-
+//adding res.render()           //urls_index.js in view will recieve data need to display
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase }; //When sending variables to an EJS template, we need to send them inside an object //// key : urls
+  res.render("urls_index", templateVars); //in view we have urls_index.js
+});
+//Adding a Second Route and Template
+app.get("/urls/:shortURL", (req, res) => { // : in front of id indicates that id is a route parameter, so :  the value in this part of the url will be available in the req.params object.
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]}; //object
+  res.render("urls_show", templateVars);
+});
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
