@@ -13,6 +13,12 @@ const urlDatabase = { //it's an object
 const bodyParser = require("body-parser"); //we installed bodyparser///// it is a library
 app.use(bodyParser.urlencoded({extended: true}));
 
+//Add a POST Route to Receive the Form Submission
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
+
 app.get("/", (req, res) => {
   res.send("Hello!");                     // I can hear you
 });
