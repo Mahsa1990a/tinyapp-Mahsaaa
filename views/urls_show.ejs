@@ -10,12 +10,22 @@
   <!-- it's from _header.ejs-->
   <%- include('partials/_header') %>
   <!-- it's from _header.ejs-->
+
+
+
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <h5 class="card-title"><b>TinyURL for: <%= longURL %></b></h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
         <p class="card-text"><a href="#">Creat a new URL</a></p> <!-- creating link href="#" for ceating new url-->
+        
+        <div class="column"><b>Edit</b></div>
+
+        <form method="POST" action="/urls/<%= shortURL %>"
+          <p>New URL: <input type="text" name="longURL"/><button type="submit">Submit!</button></p>
+        </form>
+
       </div>
     <div class="card-footer text-muted"></div>
   </div>
