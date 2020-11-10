@@ -32,7 +32,7 @@ app.post("/urls", (req, res) => {
   let longUrl = req.body.longURL; //calling objects req(is object), we need value of body(which body is object) --> { longURL: 'google.com' }
   
   urlDatabase[shortUrl] = longUrl;//then updating our urlDatabase obj
-  console.log(urlDatabase); //each time we are getting new shortURL in object
+  //console.log(urlDatabase); //each time we are getting new shortURL in object
 
   res.redirect(`/urls/${shortUrl}`)
   //console.log(req); //will show huge files, that's why we say req.body to have only body part
@@ -42,11 +42,13 @@ app.post("/urls", (req, res) => {
   
   //res.redirect('/urls/:shortUrl')
 });
-// app.post("/urls/:shortURL/edit", (req, res) => { //for testing when you go to http://localhost:8080/urls and press delete yoyr address will be the same ulrs
-//    urlDatabase[req.params.shortURL] = req.body.longURL;
-//   res.redirect("/urls")
-//   //res.send('deleting OK!')
-// });
+
+app.post("/urls/:shortURL", (req, res) => { //for testing when you go to http://localhost:8080/urls and press delete yoyr address will be the same ulrs
+   urlDatabase[req.params.shortURL] = req.body.longURL;
+   //console.log(req.body.longURL)
+  res.redirect("/urls")
+  //res.send('deleting OK!')
+});
 
 
 app.post("/urls/:shortURL/delete", (req, res) => { //for testing when you go to http://localhost:8080/urls and press delete yoyr address will be the same ulrs
