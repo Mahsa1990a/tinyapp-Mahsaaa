@@ -1,5 +1,9 @@
 const express = require("express");
+//const bodyparser = require('body-parser')
 const app = express();
+
+//app.use(bodyParser.urlencoded({extended: false}));
+
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs") //This tells the Express app to use EJS as its templating engine
@@ -38,6 +42,12 @@ app.post("/urls", (req, res) => {
   
   //res.redirect('/urls/:shortUrl')
 });
+// app.post("/urls/:shortURL/edit", (req, res) => { //for testing when you go to http://localhost:8080/urls and press delete yoyr address will be the same ulrs
+//    urlDatabase[req.params.shortURL] = req.body.longURL;
+//   res.redirect("/urls")
+//   //res.send('deleting OK!')
+// });
+
 
 app.post("/urls/:shortURL/delete", (req, res) => { //for testing when you go to http://localhost:8080/urls and press delete yoyr address will be the same ulrs
   delete urlDatabase[req.params.shortURL];
