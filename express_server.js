@@ -43,8 +43,8 @@ app.post("/urls", (req, res) => {
   //res.redirect('/urls/:shortUrl')
 });
 
-app.post("/urls/:shortURL", (req, res) => { //for testing when you go to http://localhost:8080/urls and press delete yoyr address will be the same ulrs
-   urlDatabase[req.params.shortURL] = req.body.longURL;
+app.post("/urls/:shortURL", (req, res) => { //for updating url
+   urlDatabase[req.params.shortURL] = req.body.longURL;  //update your long url
    //console.log(req.body.longURL)
   res.redirect("/urls")
   //res.send('deleting OK!')
