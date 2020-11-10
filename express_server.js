@@ -37,8 +37,10 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortUrl}`)
   //res.redirect('/urls/:shortUrl')
 });
+
+//Redirect Short URLs
 app.get("/u/:shortURL", (req, res) => {
-  // const longURL = ...
+   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
 });
 
