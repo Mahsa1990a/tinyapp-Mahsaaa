@@ -5,6 +5,13 @@ const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs") //This tells the Express app to use EJS as its templating engine
 
+
+//we will implement a function that returns a string of 6 random alphanumeric characters:
+function generateRandomString() {
+
+}
+
+
 const urlDatabase = { //it's an object
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
