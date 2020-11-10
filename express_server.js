@@ -7,9 +7,12 @@ app.set("view engine", "ejs") //This tells the Express app to use EJS as its tem
 
 
 //we will implement a function that returns a string of 6 random alphanumeric characters:
-function generateRandomString() {
 
-}
+const generateRandomString = () => {
+  // creates a random alpha-numeric string of 6 characters
+  let id = Math.random().toString(36).substring(2, 8);
+  return id;
+}; //then we app.post it
 
 
 const urlDatabase = { //it's an object
@@ -20,11 +23,17 @@ const urlDatabase = { //it's an object
 const bodyParser = require("body-parser"); //we installed bodyparser///// it is a library
 app.use(bodyParser.urlencoded({extended: true}));
 
-//Add a POST Route to Receive the Form Submission
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let newID = generateRandomString();
+  // adds the submited url into the urlDatabase with a random string ID
+  urlDatabase[newID] = `http://${req.body.longURL}`;
+  res.redirect(`/urls/${newID}`);
 });
+//Add a POST Route to Receive the Form Submission
+// app.post("/urls", (req, res) => {
+//   console.log(req.body);  // Log the POST request body to the console
+//   res.send("Ok");         // Respond with 'Ok' (we will replace this)
+// });
 
 app.get("/", (req, res) => {
   res.send("Hello!");                     // I can hear you
