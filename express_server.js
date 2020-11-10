@@ -1,9 +1,10 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
-//const bodyparser = require('body-parser')
+const bodyParser = require("body-parser");
 const app = express();
+
 app.use(cookieParser())
-//app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: true}));
 
 const PORT = 8080; // default port 8080
 
@@ -21,9 +22,6 @@ const urlDatabase = { //it's an object
   "9sm5xK": "http://www.google.com"
 };
 
-//Getting Ready for POST Requests(we need another piece of middleware: body-parser)
-const bodyParser = require("body-parser"); //we installed bodyparser///// it is a library
-app.use(bodyParser.urlencoded({extended: true}));
 
 
 //Add a POST Route to Receive the Form Submission
@@ -44,10 +42,16 @@ app.post("/urls", (req, res) => {
   //res.redirect('/urls/:shortUrl')
 });
 
+app.post("/login", (req, res) => {
+  //res.cookie(name, value [, options])
+  res.cookie('username', "Alice")
+  res.redirect("/urls");
+})
+
 app.post("/urls/:shortURL", (req, res) => { //for updating url
    urlDatabase[req.params.shortURL] = req.body.longURL;  //update your long url
    //console.log(req.body.longURL)
-  res.redirect("/urls")
+  res.redirect("/urls");
   //res.send('deleting OK!')
 });
 
