@@ -5,13 +5,11 @@ const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs") //This tells the Express app to use EJS as its templating engine
 
-
 //we will implement a function that returns a string of 6 random alphanumeric characters:
-
 const generateRandomString = () => {
   // creates a random alpha-numeric string of 6 characters
   let id = Math.random().toString(36).substring(2, 8);
-  return id;
+  return id; //it's gonna return a random number like h0agl2
 }; //then we app.post it
 
 
@@ -23,17 +21,26 @@ const urlDatabase = { //it's an object
 const bodyParser = require("body-parser"); //we installed bodyparser///// it is a library
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.post("/urls", (req, res) => {
-  let newID = generateRandomString();
-  // adds the submited url into the urlDatabase with a random string ID
-  urlDatabase[newID] = `http://${req.body.longURL}`;
-  res.redirect(`/urls/${newID}`);
-});
+
 //Add a POST Route to Receive the Form Submission
-// app.post("/urls", (req, res) => {
-//   console.log(req.body);  // Log the POST request body to the console
-//   res.send("Ok");         // Respond with 'Ok' (we will replace this)
-// });
+app.post("/urls", (req, res) => {
+  //we are definig shorUrl and longUrl:
+  let shortUrl = generateRandomString(); //is gonna be that func with random number
+  let longUrl = req.body.longURL; //calling objects req(is object), we need value of body(which body is object) --> { longURL: 'google.com' }
+  //then updating our urlDatabase obj
+  urlDatabase[shortUrl] = longUrl;
+  console.log(urlDatabase); //each time we are getting new shortURL in object
+  //console.log(req); //will show huge files, that's why we say req.body to have only body part
+  //we need only body of req:
+  //console.log(req.body);  // Log the POST request body to the console
+  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${shortUrl}`)
+  //res.redirect('/urls/:shortUrl')
+});
+app.get("/u/:shortURL", (req, res) => {
+  // const longURL = ...
+  res.redirect(longURL);
+});
 
 app.get("/", (req, res) => {
   res.send("Hello!");                     // I can hear you
