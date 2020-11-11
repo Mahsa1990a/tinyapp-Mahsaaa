@@ -22,7 +22,18 @@ const urlDatabase = { //it's an object
   "9sm5xK": "http://www.google.com"
 };
 
-
+const users = {     //Create a users Object
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 //Add a POST Route to Receive the Form Submission
 app.post("/urls", (req, res) => {
@@ -42,33 +53,54 @@ app.post("/urls", (req, res) => {
   //res.redirect('/urls/:shortUrl')
 });
 
+app.post("/register", (req, res) =>{
+  const id = generateRandomString()  //you can use that function as random id
+  const {email, password} = req.body //values from fontend
+  //console.log(req.body); //{ email: 'amerimahsa@yahoo.com', password: '1234' }
+    const key = id; //defining a key
+    const newUser = { //defining a new user from users
+      id,
+      email,
+      password
+    };
+  users[key] = newUser;
+  console.log(users); //should be before redirect
+  res.cookie('user_id', id) //set a user_id cookie containing the user's newly generated ID
+  res.redirect("/urls");
+});
+
+
 app.post("/login", (req, res) => {
   //res.cookie(name, value [, options])
-  const username = req.body.username
+  const username = req.body.user_id
   res.cookie('username', username)
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   //res.clearCookie('name', { path: '/admin' })
-  const username = req.body.username
-  res.clearCookie('username', username)
+  //const username = req.body.user_id
+  res.clearCookie('user_id')
   res.redirect("/urls");
 })
 
-app.post("/urls/:shortURL", (req, res) => { //for updating url
+app.post("/urls/:shortURL", (req, res) => { //for updating url/// edit
    urlDatabase[req.params.shortURL] = req.body.longURL;  //update your long url
    //console.log(req.body.longURL)
   res.redirect("/urls");
   //res.send('deleting OK!')
 });
 
-
 app.post("/urls/:shortURL/delete", (req, res) => { //for testing when you go to http://localhost:8080/urls and press delete yoyr address will be the same ulrs
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls")
   //res.send('deleting OK!')
 });
+
+app.get("/register", (req, res) => {
+  res.render('register')
+  //res.send('OK')
+})
 
 //Redirect Short URLs
 app.get("/u/:shortURL", (req, res) => {
@@ -90,9 +122,14 @@ app.get("/hello", (req, res) => {
 
 //adding res.render()           //urls_index.js in view will recieve data need to display
 app.get("/urls", (req, res) => {
+ // console.log('This is req.cookies.user_id '+ req.cookies.user_id) //This is req.cookies.user_id dn6h09
+ //console.log("This is users of req coockie ... "+ users[req.cookies.user_id])
+  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
   const templateVars = { 
     urls: urlDatabase, 
-    username: req.cookies.username
+    //user:user1, //user1 is my value
+    username: user
+    //req.cookies.username
   }; //When sending variables to an EJS template, we need to send them inside an object //// key : urls
   res.render("urls_index", templateVars); //in view we have urls_index.js
 });
