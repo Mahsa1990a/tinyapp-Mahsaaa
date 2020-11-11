@@ -8,19 +8,22 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-
-        <% if(username) { %>
-          <%= `Logged in as ${username}` %>
+      
+        <div style="align-content: right">
+          <% if(username) { %>
+          <%= `Logged in as TinyApp User!${username}` %>
           <form method="POST" action="/logout"> 
             <p><button type="submit">LogOut!</button></p> 
-            </form>
-
+          </form>
+        </div>
+        
         <% } else { %>
-          <form method="POST" action="/login"> 
-            <p>Sign In: <input type="text" name="username"/><button type="submit">Submit!</button></p> 
-            </form>
-            <% } %>
-            
+        <div class="float-right">
+          <a class="nav-item nav-link" href="/login">Login</a>
+        <a class="nav-item nav-link" href="/register">Register</a>
+          <% } %>
+          
+        </div>
       </div>
     </div>
   </nav>
