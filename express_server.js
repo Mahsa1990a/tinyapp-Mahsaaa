@@ -47,6 +47,13 @@ app.post("/login", (req, res) => {
   const username = req.body.username
   res.cookie('username', username)
   res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {
+  //res.clearCookie('name', { path: '/admin' })
+  const username = req.body.username
+  res.clearCookie('username', username)
+  res.redirect("/urls");
 })
 
 app.post("/urls/:shortURL", (req, res) => { //for updating url
