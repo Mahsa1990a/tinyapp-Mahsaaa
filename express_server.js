@@ -53,9 +53,25 @@ app.post("/urls", (req, res) => {
   //res.redirect('/urls/:shortUrl')
 });
 
-app.post("/register", (req, res) =>{
+//helper function :   db: user database
+const fetchEmail = (db, email) => {
+  for(const id in db) { //every key:id
+    if (db[id].email === email) {
+      return true //no error
+    }
+  }
+  return false
+}
+
+app.post("/register", (req, res) => {
   const id = generateRandomString()  //you can use that function as random id
   const {email, password} = req.body //values from fontend
+
+  if(email === "" || password === ""){
+    return res.status(400).send("email or password is invalid");
+  } else if (fetchEmail(users, email)){
+    return res.status(400).send("email is already in use");
+  }
   //console.log(req.body); //{ email: 'amerimahsa@yahoo.com', password: '1234' }
     const key = id; //defining a key
     const newUser = { //defining a new user from users
@@ -69,6 +85,15 @@ app.post("/register", (req, res) =>{
   res.redirect("/urls");
 });
 
+
+
+app.get("/login", (req, res) => { //new get login
+  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
+  const templateVars = {
+    username: user
+  };
+  res.render("urls_login", templateVars) //creating urls_login.ejs
+});
 
 app.post("/login", (req, res) => {
   //res.cookie(name, value [, options])
@@ -129,7 +154,7 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase, 
     //user:user1, //user1 is my value
     username: user
-    //req.cookies.username
+    //username: req.cookies.username
   }; //When sending variables to an EJS template, we need to send them inside an object //// key : urls
   res.render("urls_index", templateVars); //in view we have urls_index.js
 });
