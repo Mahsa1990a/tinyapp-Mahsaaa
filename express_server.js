@@ -44,7 +44,8 @@ app.post("/urls", (req, res) => {
 
 app.post("/login", (req, res) => {
   //res.cookie(name, value [, options])
-  res.cookie('username', "Alice")
+  const username = req.body.username
+  res.cookie('username', username)
   res.redirect("/urls");
 })
 
@@ -82,7 +83,10 @@ app.get("/hello", (req, res) => {
 
 //adding res.render()           //urls_index.js in view will recieve data need to display
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase }; //When sending variables to an EJS template, we need to send them inside an object //// key : urls
+  const templateVars = { 
+    urls: urlDatabase, 
+    username: req.cookies.username
+  }; //When sending variables to an EJS template, we need to send them inside an object //// key : urls
   res.render("urls_index", templateVars); //in view we have urls_index.js
 });
 
