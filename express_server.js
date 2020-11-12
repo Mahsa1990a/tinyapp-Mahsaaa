@@ -41,10 +41,11 @@ app.post("/urls", (req, res) => {
   let shortUrl = generateRandomString(); //is gonna be that func with random number
   let longUrl = req.body.longURL; //calling objects req(is object), we need value of body(which body is object) --> { longURL: 'google.com' }
   
-  urlDatabase[shortUrl] = longUrl;//then updating our urlDatabase obj
+  //urlDatabase[shortUrl] = longUrl;            //then updating our urlDatabase obj   ,,, //shortUrl: key & longUrl: value
   //console.log(urlDatabase); //each time we are getting new shortURL in object
 
-  //urlDatabase[shorturl] = {longurl: longUrl, userID: req.cookies.user_id}
+ //          URLs Belong to Users:           \\
+  urlDatabase[shorturl] = {longurl: longUrl, userID: req.cookies.user_id}
 
   res.redirect(`/urls/${shortUrl}`)
   //console.log(req); //will show huge files, that's why we say req.body to have only body part
