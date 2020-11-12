@@ -44,6 +44,8 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortUrl] = longUrl;//then updating our urlDatabase obj
   //console.log(urlDatabase); //each time we are getting new shortURL in object
 
+  //urlDatabase[shorturl] = {longurl: longUrl, userID: req.cookies.user_id}
+
   res.redirect(`/urls/${shortUrl}`)
   //console.log(req); //will show huge files, that's why we say req.body to have only body part
   //we need only body of req:
@@ -109,6 +111,7 @@ app.post("/login", (req, res) => {
   if(email === "" || password === ""){
     return res.status(403).send("email or password is invalid");
   } 
+  console.log(users)
   const user = fetchEmail(users, email) //defining the function
     if (!user || user.password !== password ) { //if user doesn't exist and password doesn't match 
       return res.status(403).send("user or password is not match") 
@@ -122,7 +125,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   //res.clearCookie('name', { path: '/admin' })
   //const username = req.body.user_id
-  res.clearCookie('user_id')
+  res.clearCookie('user_id') //updating logout handler to user_id
   res.redirect("/urls");
 })
 
@@ -178,12 +181,28 @@ app.get("/urls", (req, res) => {
 
 //Add a GET Route to Show the Form and should be before app.get("/urls/:id", ...)
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  console.log(req.cookies)
+  
+  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
+  const templateVars = { 
+    urls: urlDatabase, 
+    username: user
+  }
+  if (!user){
+    
+    return res.render('urls_login', templateVars)
+  }
+  res.render("urls_new", templateVars);
 });
 
 //Adding a Second Route and Template
 app.get("/urls/:shortURL", (req, res) => { // : in front of id indicates that id is a route parameter, so :  the value in this part of the url will be available in the req.params object.
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]}; //object
+  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  const templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL],
+    username: user
+  }; //object
   res.render("urls_show", templateVars);
 });
 
