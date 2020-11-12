@@ -57,10 +57,10 @@ app.post("/urls", (req, res) => {
 const fetchEmail = (db, email) => {
   for(const id in db) { //every key:id
     if (db[id].email === email) {
-      return true //no error
+      return db[id]; //return the key of db object
     }
   }
-  return false
+  return false;
 }
 
 app.post("/register", (req, res) => {
@@ -85,7 +85,13 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-
+app.get("/register", (req, res) => {
+  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
+  const templateVars = {
+    username: user
+  };
+  res.render("urls_register", templateVars)//creating urls_register.ejs
+});
 
 app.get("/login", (req, res) => { //new get login
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
@@ -95,10 +101,21 @@ app.get("/login", (req, res) => { //new get login
   res.render("urls_login", templateVars) //creating urls_login.ejs
 });
 
+
 app.post("/login", (req, res) => {
-  //res.cookie(name, value [, options])
-  const username = req.body.user_id
-  res.cookie('username', username)
+ 
+  const {email, password} = req.body 
+
+  if(email === "" || password === ""){
+    return res.status(403).send("email or password is invalid");
+  } 
+  const user = fetchEmail(users, email) //defining the function
+    if (!user || user.password !== password ) { //if user doesn't exist and password doesn't match 
+      return res.status(403).send("user or password is not match") 
+      //compare password given in the form and existing user password
+    }
+      //if the user exist and password match :
+  res.cookie('user_id', user.id) //set a user_id cookie containing the user's newly generated ID
   res.redirect("/urls");
 });
 
