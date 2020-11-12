@@ -181,14 +181,14 @@ app.get("/urls", (req, res) => {
 
 //Add a GET Route to Show the Form and should be before app.get("/urls/:id", ...)
 app.get("/urls/new", (req, res) => {
-  console.log(req.cookies)
+  //console.log(req.cookies)
   
   const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
   const templateVars = { 
     urls: urlDatabase, 
     username: user
   }
-  if (!user){
+  if (!user){   //if someone is not logged in when trying to access /urls/new, redirect them to the login page
     
     return res.render('urls_login', templateVars)
   }
