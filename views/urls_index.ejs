@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <title>TinyApp</title>
@@ -14,29 +13,31 @@
   <!-- it's from _header.ejs-->
   <main style="margin: 1em;">
     <h3>My URLs</h3>
-    
     <table class="table">
-      
       <thead>
         <tr>
+          <% if(username) { %>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
-          <th scope="col">Delete</th>
           <th scope="col">Edit</th>
+          <th scope="col">Delete</th> 
         </tr>
       </thead>
       <tbody>
+        <% console.log('This is local index '+ locals)  %>
         <% for(let url in urls) { %>
           <tr>
-            <td><%= url %></td>
-            <td><%= urls[url] %></td>
-            
+            <td><%= url %></td>   <!--short url-->
+            <td><%= urls[url]["longURL"] %></td> <!--long url-->
+            <td><form method="GET" action="/urls/<%= url %>"><button type="submit">Edit</button></form> <!--we have to change method for edit to be get, because edit is like a link-->
             <td><form method="POST" action="/urls/<%= url %>/delete"><button type="submit">Delete</button></form></td>
-            <td><p><a href = "/urls/<%= url %>">Edit</a></p>
             </td>
           </tr>
         <% } %>
       </tbody>
+      <% } else { %>
+      <h3>Please login or register!</h3>
+      <% } %>
     </table>
   </main>
   <!-- Bootstrap JS -->
