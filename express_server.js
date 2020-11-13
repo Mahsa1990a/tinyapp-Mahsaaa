@@ -1,12 +1,17 @@
 const express = require("express");
-const cookieParser = require('cookie-parser');
+//const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
 
 const app = express();
+//app.use(cookieParser())
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}))
 
-app.use(cookieParser())
 app.use(bodyParser.urlencoded({extended: true}));
 
 const PORT = 8080; // default port 8080
@@ -55,7 +60,7 @@ app.post("/urls", (req, res) => {
  //          URLs Belong to Users:           \\
   urlDatabase[shortURL] = {
     longURL: longURL,
-    userID: req.cookies.user_id
+    userID: req.session["user_id"]
   }
   //console.log(urlDatabase); 
 
@@ -98,12 +103,13 @@ app.post("/register", (req, res) => {
     
   users[key] = newUser;
   console.log('users with ugly password ',users); //should be before redirect
-  res.cookie('user_id', id) //set a user_id cookie containing the user's newly generated ID
+  req.session['user_id'] = id;    //Update Our Cookie Code or req.session.user_id
+  //res.cookie('user_id', id) //set a user_id cookie containing the user's newly generated ID
   res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
+  const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : ""; //does or not user exist(if does, pass rhe email)
   const templateVars = {
     username: user
   };
@@ -111,7 +117,7 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => { //new get login
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
+  const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : ""; //does or not user exist(if does, pass rhe email)
   const templateVars = {
     username: user
   };
@@ -135,7 +141,7 @@ app.post("/login", (req, res) => {
   if(email === "" || password === ""){
     return res.status(403).send("email or password is invalid");
   } 
-  console.log(users)
+ // console.log(users)
   const user = fetchEmail(users, email) //defining the function
   //(!user || user.password !== password ) old one
     if (!user || !bcrypt.compareSync(password, user.password)) { // hashing first one and compaare it to the second
@@ -144,7 +150,8 @@ app.post("/login", (req, res) => {
       //compare password given in the form and existing user password
     }
       //if the user exist and password match :
-  res.cookie('user_id', user.id) //set a user_id cookie containing the user's newly generated ID
+  //res.cookie('user_id', user.id) //set a user_id cookie containing the user's newly generated ID
+  req.session['user_id'] = user.id; 
   res.redirect("/urls");
 
   // bcrypt.compareSync("password", hashedPassword); // returns true
@@ -154,7 +161,8 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   //res.clearCookie('name', { path: '/admin' })
   //const username = req.body.user_id
-  res.clearCookie('user_id') //updating logout handler to user_id
+  //res.clearCookie('user_id') //updating logout handler to user_id
+  req.session = null;
   res.redirect("/urls");
 });
 
@@ -163,7 +171,7 @@ app.post("/urls/:shortURL", (req, res) => { //for updating url/// edit
    //urlDatabase[req.params.shortURL] = req.body.longURL;  //update your long url
    //console.log(req.body.longURL)
    const shortURL = req.params.shortURL;
-   const userId = req.cookies.user_id;
+   const userId = req.session["user_id"];
    //console.log('req.body= ', req.body)
    const longURL = req.body.longURL
    const ulrBlongsToUser = urlDatabase[shortURL] && userId === urlDatabase[shortURL]["userID"]
@@ -192,7 +200,7 @@ app.post("/urls/:shortURL/delete", (req, res) => { //for testing when you go to 
   //   return res.redirect('/login')
   //  }
   const shortURL = req.params.shortURL;
-  const userId = req.cookies.user_id;
+  const userId = req.session["user_id"];
   const ulrBlongsToUser = urlDatabase[shortURL] && userId === urlDatabase[shortURL]["userID"]
   if(ulrBlongsToUser){
     delete urlDatabase[req.params.shortURL];
@@ -248,7 +256,7 @@ app.get("/urls", (req, res) => {
  // console.log('This is req.cookies.user_id '+ req.cookies.user_id) //This is req.cookies.user_id dn6h09
  //console.log("This is users of req coockie ... "+ users[req.cookies.user_id])
   //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].id : ""; 
+  const user = users[req.session["user_id"]] ? users[req.session["user_id"]].id : ""; 
    //if(!user){
    // return res.redirect('/login')
   // }
@@ -272,7 +280,7 @@ app.get("/urls", (req, res) => {
 //Add a GET Route to Show the Form and should be before app.get("/urls/:id", ...)
 app.get("/urls/new", (req, res) => {
   //console.log(req.cookies)
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
+  const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : ""; //does or not user exist(if does, pass rhe email)
   const templateVars = { 
     urls: urlDatabase,    // templateVars object contains urlDatabase obj under key urls
     username: user
@@ -288,7 +296,7 @@ app.get("/urls/new", (req, res) => {
 
 //Adding a Second Route and Template
 app.get("/urls/:shortURL", (req, res) => { // : in front of id indicates that id is a route parameter, so :  the value in this part of the url will be available in the req.params object.
-  const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : "";
+  const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : "";
   if(!user){
     return res.redirect('/login')
    }
