@@ -4,7 +4,7 @@ const cookieSession = require('cookie-session')
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
-const { fetchEmail } = require("./helpers")
+const { fetchEmail, urlsForUser, urlDatabase, users } = require("./helpers")
 //const { urlsForUser } = require("./helpers")
 
 const app = express();
@@ -13,11 +13,10 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }))
-
 app.use(bodyParser.urlencoded({extended: true}));
-
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs") //This tells the Express app to use EJS as its templating engine
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //we will implement a function that returns a string of 6 random alphanumeric characters:
 const generateRandomString = () => {
@@ -26,52 +25,42 @@ const generateRandomString = () => {
   return id; //it's gonna return a random number like h0agl2
 }; //then we app.post it
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const urlDatabase = { //it's an object
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },  //urlDatabase[req.params.shortURL]["longURL"]
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
-};
-
 // const urlDatabase = {
 //   "b2xVn2": "http://www.lighthouselabs.ca",
 //   "9sm5xK": "http://www.google.com"
 // };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const users = {     //Create a users Object   access id : users.id
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  }
-}
+// const users = {     //Create a users Object   access id : users.id
+//   "userRandomID": {
+//     id: "userRandomID", 
+//     email: "user@example.com", 
+//     password: "purple-monkey-dinosaur"
+//   },
+//  "user2RandomID": {
+//     id: "user2RandomID", 
+//     email: "user2@example.com", 
+//     password: "dishwasher-funk"
+//   }
+// }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Add a POST Route to Receive the Form Submission
 app.post("/urls", (req, res) => {
-  //we are definig shorUrl and longUrl:
+  //we are definig shorUrl and longUrl and userID:
   let shortURL = generateRandomString(); //is gonna be that func with random number
   let longURL = req.body.longURL; //calling objects req(is object), we need value of body(which body is object) --> { longURL: 'google.com' }
-  
+  let userID = req.session["user_id"]
  // urlDatabase[shortURL] = longURL;            //then updating our urlDatabase obj   ,,, //shortUrl: key & longUrl: value
   //console.log(urlDatabase); //each time we are getting new shortURL in object
-
- //          URLs Belong to Users:           \\
+  //updateUrlDatabase(shortURL, longURL, userID);
   urlDatabase[shortURL] = {
-    longURL: longURL,
-    userID: req.session["user_id"]
+    longURL,
+    userID
   }
-  //console.log(urlDatabase); 
-
   res.redirect(`/urls/${shortURL}`)
   //console.log(req); //will show huge files, that's why we say req.body to have only body part
   //we need only body of req:
   //console.log(req.body);  // Log the POST request body to the console
   //res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  
   //res.redirect('/urls/:shortUrl')
 });
 
@@ -87,7 +76,7 @@ app.post("/urls", (req, res) => {
 
 app.post("/register", (req, res) => {
   const id = generateRandomString()  //you can use that function as random id
-  const {email, password} = req.body //values from fontend
+  const {email, password} = req.body //values from frontend
   //const email = req.body.email
   //const password = req.body.password
   if(email === "" || password === ""){
@@ -104,26 +93,27 @@ app.post("/register", (req, res) => {
     };
     
   users[key] = newUser;
-  console.log('users with ugly password ',users); //should be before redirect
+  //console.log('users with ugly password ',users); //should be before redirect
   req.session['user_id'] = id;    //Update Our Cookie Code or req.session.user_id
   //res.cookie('user_id', id) //set a user_id cookie containing the user's newly generated ID
   res.redirect("/urls");
 });
 
+
 app.get("/register", (req, res) => {
-  const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : ""; //does or not user exist(if does, pass rhe email)
+  const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : ""; //does or not user exist(if does, pass the email)
   const templateVars = {
     username: user
   };
   res.render("urls_register", templateVars)//creating urls_register.ejs
 });
 
-app.get("/login", (req, res) => { //new get login
+app.get("/login", (req, res) => { 
   const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : ""; //does or not user exist(if does, pass rhe email)
   const templateVars = {
     username: user
   };
-  res.render("urls_login", templateVars) //creating urls_login.ejs
+  res.render("urls_login", templateVars)
 });
 
 
@@ -155,9 +145,6 @@ app.post("/login", (req, res) => {
   //res.cookie('user_id', user.id) //set a user_id cookie containing the user's newly generated ID
   req.session['user_id'] = user.id; 
   res.redirect("/urls");
-
-  // bcrypt.compareSync("password", hashedPassword); // returns true
-  // bcrypt.compareSync("password", hashedPassword); // returns false
 });
 
 app.post("/logout", (req, res) => {
@@ -221,6 +208,7 @@ app.get("/register", (req, res) => {
   //res.send('OK')
 })
 
+
 //Redirect Short URLs
 app.get("/u/:shortURL", (req, res) => {
   //console.log(urlDatabase)
@@ -243,23 +231,25 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");  //"Hello World".
 });
 
-//helper function:
-const urlsForUser = function(id) {
-  const urlsOfUser = {};
-  for (const key in urlDatabase) {
-    if(urlDatabase[key]["userID"] === id) {
-      urlsOfUser[key] = urlDatabase[key];
-    }
-  }
-  return urlsOfUser;
-}
 
-//adding res.render()           //urls_index.js in view will recieve data need to display
+
+//helper function:
+// const urlsForUser = function(id) {
+//   const urlsOfUser = {};
+//   for (const key in urlDatabase) {
+//     if(urlDatabase[key]["userID"] === id) {
+//       urlsOfUser[key] = urlDatabase[key];
+//     }
+//   }
+//   return urlsOfUser;
+// }
+//                                       adding res.render()           //urls_index.js in view will recieve data need to display
 app.get("/urls", (req, res) => {
  // console.log('This is req.cookies.user_id '+ req.cookies.user_id) //This is req.cookies.user_id dn6h09
  //console.log("This is users of req coockie ... "+ users[req.cookies.user_id])
   //const user = users[req.cookies.user_id] ? users[req.cookies.user_id].email : ""; //does or not user exist(if does, pass rhe email)
   const user = users[req.session["user_id"]] ? users[req.session["user_id"]].id : ""; 
+  const username = user ? users[req.session["user_id"]].email : ""; //for showing email when you login
    //if(!user){
    // return res.redirect('/login')
   // }
@@ -267,9 +257,7 @@ app.get("/urls", (req, res) => {
   //console.log('This is ulrfunction ', urlofTheUser)
   const templateVars = {      //it was : const templateVars = { urls: urlDatabase };
     urls: urlofTheUser , //was urls: urlDatabase
-  
-    //user:user1, //user1 is my value
-    username: user
+    username
     //username: req.cookies.username
   }; //When sending variables to an EJS template, we need to send them inside an object //// key : urls
   //console.log(urlDatabase)
@@ -283,21 +271,29 @@ app.get("/urls", (req, res) => {
 //Add a GET Route to Show the Form and should be before app.get("/urls/:id", ...)
 app.get("/urls/new", (req, res) => {
   //console.log(req.cookies)
-  const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : ""; //does or not user exist(if does, pass rhe email)
+  const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : ""; 
   const templateVars = { 
-    urls: urlDatabase,    // templateVars object contains urlDatabase obj under key urls
+    urls: urlDatabase, 
     username: user
   }
   if (!user){   //if someone is not logged in when trying to access /urls/new, redirect them to the login page
-    
     return res.render('urls_login', templateVars)
   }
   res.render("urls_new", templateVars);
 });
 
 
+//helper function:
+// const urlsForUser = function(id) {
+//   const urlsOfUser = {};
+//   for (const key in urlDatabase) {
+//     if(urlDatabase[key]["userID"] === id) {
+//       urlsOfUser[key] = urlDatabase[key];
+//     }
+//   }
+//   return urlsOfUser;
+// }
 
-//Adding a Second Route and Template
 app.get("/urls/:shortURL", (req, res) => { // : in front of id indicates that id is a route parameter, so :  the value in this part of the url will be available in the req.params object.
   const user = users[req.session["user_id"]] ? users[req.session["user_id"]].email : "";
   if(!user){
@@ -308,22 +304,12 @@ app.get("/urls/:shortURL", (req, res) => { // : in front of id indicates that id
     longURL: urlDatabase[req.params.shortURL].longURL ,
     urls: urlsForUser(user.id), 
     username: user
-  }; //object
-
+  }; 
   //const longURL = urlDatabase[req.params.shortURL]["longURL"];
   res.render("urls_show", templateVars);
 });
 
 
-
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-// when we do :
-//curl -i http://localhost:8080/hello we will see :
-// We see the entire HTTP response string:
-
-// the response headers (one on each line), followed by
-// the HTML content that the /hello path responds with: <html><body>Hello <b>World</b></body></html>
