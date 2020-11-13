@@ -4,6 +4,8 @@ const cookieSession = require('cookie-session')
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
+const { fetchEmail } = require("./helpers")
+//const { urlsForUser } = require("./helpers")
 
 const app = express();
 //app.use(cookieParser())
@@ -74,14 +76,14 @@ app.post("/urls", (req, res) => {
 });
 
 //helper function :   db: user database
-const fetchEmail = (db, email) => {
-  for(const id in db) { //every key:id
-    if (db[id].email === email) {
-      return db[id]; //return the key of db object
-    }
-  }
-  return false;
-}
+// const fetchEmail = (db, email) => {
+//   for(const id in db) { //every key:id
+//     if (db[id].email === email) {
+//       return db[id]; //return the key of db object
+//     }
+//   }
+//   return false;
+// }
 
 app.post("/register", (req, res) => {
   const id = generateRandomString()  //you can use that function as random id
@@ -241,6 +243,7 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");  //"Hello World".
 });
 
+//helper function:
 const urlsForUser = function(id) {
   const urlsOfUser = {};
   for (const key in urlDatabase) {
