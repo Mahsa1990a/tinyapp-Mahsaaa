@@ -1,6 +1,9 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
+const bcrypt = require("bcryptjs");
+const salt = bcrypt.genSaltSync(10);
+
 const app = express();
 
 app.use(cookieParser())
@@ -78,7 +81,8 @@ const fetchEmail = (db, email) => {
 app.post("/register", (req, res) => {
   const id = generateRandomString()  //you can use that function as random id
   const {email, password} = req.body //values from fontend
-
+  //const email = req.body.email
+  //const password = req.body.password
   if(email === "" || password === ""){
     return res.status(400).send("email or password is invalid");
   } else if (fetchEmail(users, email)){
@@ -89,10 +93,11 @@ app.post("/register", (req, res) => {
     const newUser = { //defining a new user from users
       id,
       email,
-      password
+      password: bcrypt.hashSync(password, salt)
     };
+    
   users[key] = newUser;
-  console.log(users); //should be before redirect
+  console.log('users with ugly password ',users); //should be before redirect
   res.cookie('user_id', id) //set a user_id cookie containing the user's newly generated ID
   res.redirect("/urls");
 });
@@ -114,6 +119,15 @@ app.get("/login", (req, res) => { //new get login
 });
 
 
+//helper function :   db: user database
+// const fetchEmail = (db, email) => {
+//   for(const id in db) { //every key:id
+//     if (db[id].email === email) {
+//       return db[id]; //return the key of db object
+//     }
+//   }
+//   return false;
+// }
 app.post("/login", (req, res) => {
  
   const {email, password} = req.body 
@@ -123,13 +137,18 @@ app.post("/login", (req, res) => {
   } 
   console.log(users)
   const user = fetchEmail(users, email) //defining the function
-    if (!user || user.password !== password ) { //if user doesn't exist and password doesn't match 
+  //(!user || user.password !== password ) old one
+    if (!user || !bcrypt.compareSync(password, user.password)) { // hashing first one and compaare it to the second
+      //                                                             bcrypt.compareSync("B4c0/\/", hash)
       return res.status(403).send("user or password is not match") 
       //compare password given in the form and existing user password
     }
       //if the user exist and password match :
   res.cookie('user_id', user.id) //set a user_id cookie containing the user's newly generated ID
   res.redirect("/urls");
+
+  // bcrypt.compareSync("password", hashedPassword); // returns true
+  // bcrypt.compareSync("password", hashedPassword); // returns false
 });
 
 app.post("/logout", (req, res) => {
@@ -148,7 +167,7 @@ app.post("/urls/:shortURL", (req, res) => { //for updating url/// edit
    //console.log('req.body= ', req.body)
    const longURL = req.body.longURL
    const ulrBlongsToUser = urlDatabase[shortURL] && userId === urlDatabase[shortURL]["userID"]
-   c//onsole.log('this is url befor :',urlDatabase )
+   //console.log('this is url befor :',urlDatabase )
    if(ulrBlongsToUser){
     urlDatabase[shortURL] = {longURL: longURL, userID: userId}
    // console.log('this is url after ' , urlDatabase)
@@ -198,7 +217,7 @@ app.get("/u/:shortURL", (req, res) => {
   //console.log(req.params.shortURL)
   //const longURL = urlDatabase[req.params.shortURL] it was
    const longURL = urlDatabase[req.params.shortURL]["longURL"];
-   console.log(longURL)
+   //console.log(longURL)
   res.redirect(longURL);
 });
 
@@ -234,7 +253,7 @@ app.get("/urls", (req, res) => {
    // return res.redirect('/login')
   // }
   const urlofTheUser = urlsForUser(user);
-  console.log('This is ulrfunction ', urlofTheUser)
+  //console.log('This is ulrfunction ', urlofTheUser)
   const templateVars = {      //it was : const templateVars = { urls: urlDatabase };
     urls: urlofTheUser , //was urls: urlDatabase
   
